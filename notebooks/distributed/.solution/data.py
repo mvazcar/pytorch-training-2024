@@ -24,19 +24,17 @@ def get_dataloaders(global_batch_size=256, download_dir="data/"):
         else:
             print("[Rank 0] Dataset already exists, skipping download.")
 
-    ### TODO: Wait for other ranks to continue after download
-    # dist.______
+    # Wait for rank 0 to finish download before continuing
+    dist.barrier()
 
     world_size = dist.get_world_size()
-    ### TODO: How many samples should each worker see?
-    # local_batch_size = ______
+    local_batch_size = global_batch_size // world_size
 
     trainset = datasets.CIFAR10(download_dir, train=True, transform=transform)
     testset = datasets.CIFAR10(download_dir, train=False, transform=transform)
 
-    ### TODO: Ensure each rank gets unique shards of data
-    train_sampler = ________
-    test_sampler = ________
+    train_sampler = DistributedSampler(trainset, shuffle=True)
+    test_sampler = DistributedSampler(testset, shuffle=False)
 
     trainloader = DataLoader(trainset, batch_size=local_batch_size, sampler=train_sampler)
     testloader = DataLoader(testset, batch_size=local_batch_size, sampler=test_sampler)
@@ -48,7 +46,6 @@ def get_dataloaders(global_batch_size=256, download_dir="data/"):
         print(f"[INFO] Local batch size per worker: {local_batch_size}")
         print(f"[INFO] Samples per worker per epoch: {len(trainset) // world_size}")
 
-    ### TODO: Sync again among all ranks before training
-    # dist.______
+    dist.barrier()
 
     return trainloader, testloader

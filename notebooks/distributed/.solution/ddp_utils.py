@@ -11,8 +11,6 @@ def get_ddp_model(device_id):
         print(f"[Rank 0] Running in DDP mode with {world_size} processes")
 
     model = CNN().to(torch.device(f"cuda:{device_id}"))
-
-    ### TODO: Wrap model in DDP
-    # model = nn.parallel.___________
+    model = nn.parallel.DistributedDataParallel(model, device_ids=[device_id])
 
     return model

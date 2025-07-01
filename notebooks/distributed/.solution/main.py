@@ -10,8 +10,7 @@ from fsdp_utils import get_fsdp_model
 import argparse
 
 def run(args):
-    ### TODO: Initialize distributed training (hint: distributed_utils.py)
-    # local_rank = _____
+    local_rank = setup()
     device = torch.device(f"cuda:{local_rank}")
 
     trainloader, validloader = get_dataloaders(global_batch_size=args.batch_size)
@@ -23,12 +22,10 @@ def run(args):
     else:
         raise ValueError(f"Unknown method: {args.method}")
 
-    # The optimizer and the loss function are identical to the serial training
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     loss_function = nn.NLLLoss()
 
-    ### TODO: Launch training
-    # train(_____)
+    train(model, optimizer, loss_function, args.epochs, device, trainloader, validloader, args.print_every)
 
     cleanup()
 

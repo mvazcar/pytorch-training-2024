@@ -11,15 +11,10 @@ def setup():
         - RANK, LOCAL_RANK and WORLD_SIZE are set by SLURM (or manually).
     """
     local_rank = int(os.environ.get("LOCAL_RANK", 0))
-
     if not dist.is_initialized():
-        ### TODO: Initialize the default process group
-        ### Use NCCL backend and supply the correct device_id
-        # dist.init_process_group(_______)
-
-    ### TODO: Set the current CUDA device to the local rank
-    # torch.cuda.set_device(_______)
-
+        # Automatically picks up env variables
+        dist.init_process_group(backend="nccl", device_id=torch.device(f"cuda:{local_rank}"))
+    torch.cuda.set_device(local_rank)
     return local_rank
 
 def cleanup():

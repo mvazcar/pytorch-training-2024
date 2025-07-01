@@ -6,9 +6,8 @@ from utils import log_training_step
 
 def train(model, optimizer, loss_function, epochs, device, trainloader, validloader, print_every):
 
-    ### TODO: Move model to appropriate device and ensure it is in training mode
-    # model._____
-    # model._____
+    model.to(device)
+    model.train()
 
     train_losses, valid_losses, accuracies = [], [], []
     
@@ -28,9 +27,8 @@ def train(model, optimizer, loss_function, epochs, device, trainloader, validloa
         epoch_start = time.time()
 
         # Required to shuffle differently at each epoch
-        ### TODO: If using a distributed sampler, set epoch for shuffling
         if has_distributed_sampler:
-            # train_sampler._____
+            train_sampler.set_epoch(epoch)
 
         # Training loop for one epoch
         for images, labels in trainloader:
@@ -87,10 +85,9 @@ def train(model, optimizer, loss_function, epochs, device, trainloader, validloa
 
         # Synchronize metrics across all workers
         if dist.is_initialized():
-            ### TODO: All-reduce metrics (valid_loss, correct_preds, total_samples) across workers (summation)
-            # _____
-            # _____
-            # _____
+            dist.all_reduce(valid_loss, op=dist.ReduceOp.SUM)
+            dist.all_reduce(correct_preds, op=dist.ReduceOp.SUM)
+            dist.all_reduce(total_samples, op=dist.ReduceOp.SUM)
 
         avg_valid_loss = valid_loss.item() / len(validloader.dataset)
         avg_accuracy = 100.0 * correct_preds.item() / total_samples.item()
