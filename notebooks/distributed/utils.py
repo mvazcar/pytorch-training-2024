@@ -40,10 +40,11 @@ def pretty_log(
     """
     Constructs a colored log string with memory and gradient stats.
     """
-    log_string = f"{color.BOLD}{color.CYAN}> global batch {iteration:8d}/{total_train_iters:8d} |{color.END}"
+
+    log_string = f"{color.BOLD}{color.CYAN}> global batch {iteration:8d}/{total_train_iters:8d} {color.END}|"
     log_string += f" elapsed time per batch (ms): {elapsed_time_per_iteration:.1f} |"
     log_string += f" learning rate: {learning_rate:.3E} |"
-    log_string += f" loss: {train_loss:.5f} |"
+    log_string += f"{color.GREEN} loss: {train_loss:.5f}{color.END} |"
 
     curr_mem = torch.cuda.memory_allocated() / 1024 / 1024 / 1024
     peak_mem = torch.cuda.max_memory_allocated() / 1024 / 1024 / 1024
@@ -60,18 +61,23 @@ def log_training_step(
     model,
     optimizer,
     step_start_time,
+    print_every=10,
 ):
     """
+    Logs training info every `print_every` steps.
     Reduces and logs training stats across ranks.
     Should be called inside the training loop.
     """
+
+    # Only log every `print_every` steps
+    if iteration % print_every != 0 and iteration != total_train_iters - 1:
+        return
 
     # Compute grad norm (sync across model replicas)
     total_norm = torch.norm(
         torch.stack([
             p.grad.detach().data.norm(2)
-            for p in model.parameters()
-            if p.grad is not None
+            for p in model.parameters() if p.grad is not None
         ])
     ).to(loss_tensor.device)
 
@@ -83,5 +89,12 @@ def log_training_step(
 
     if dist.get_rank() == 0:
         lr = optimizer.param_groups[0]['lr']
-        print(pretty_log(iteration, total_train_iters, loss_avg.item(), elapsed, norm_avg.item(), lr))
+        print(pretty_log(
+            iteration,
+            total_train_iters,
+            loss_avg.item(),
+            elapsed,
+            norm_avg.item(),
+            lr
+        ))
 
