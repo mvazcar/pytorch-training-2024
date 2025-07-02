@@ -28,8 +28,8 @@ SBATCH_HEADER = """#!/bin/bash
 #SBATCH --output=logs/{job_name}.out
 #SBATCH --error=logs/{job_name}.err
 #SBATCH --time=00:10:00
-#SBATCH --partition=normal
-#SBATCH --account=csstaff
+#SBATCH --account=crs01
+#SBATCH --reservation=pytorch
 #SBATCH --no-requeue
 #SBATCH --exclusive
 

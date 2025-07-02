@@ -240,9 +240,9 @@ Three plots will be produced, each with number of GPUs on the x-axis:
     - Shows how training speed improves (or doesn’t) with more GPUs
     - Ideal: time decreases ~linearly
 
-2. Validation loss
+2. Validation loss and accuracy
     - Shows whether scaling affects model convergence
-    - If loss increases with more GPUs, investigate batch size or training duration
+    - Loss should not increase / accuracy decrease with more GPUs
 
 3. Peak memory per GPU
     - Shows how much memory is used
