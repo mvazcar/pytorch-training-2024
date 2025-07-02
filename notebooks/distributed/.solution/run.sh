@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #SBATCH --job-name="testrun"
-#SBATCH --partition=normal
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
 #SBATCH --gpus-per-node=4
@@ -9,7 +8,8 @@
 #SBATCH --time=00:10:00
 #SBATCH --no-requeue
 #SBATCH --exclusive
-#SBATCH -A csstaff
+#SBATCH --account=crs01
+#SBATCH --reservation=pytorch
 #SBATCH --output=train.log
 #SBATCH --error=train.err
 
