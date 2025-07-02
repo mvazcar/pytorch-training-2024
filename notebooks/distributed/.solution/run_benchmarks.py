@@ -43,7 +43,7 @@ export MPICH_GPU_SUPPORT_ENABLED=0
 export CUDA_CACHE_DISABLE=1
 export OMP_NUM_THREADS=64
 
-srun -ul --environment=./edf.toml python main.py --method {method} --epochs 5 --batch_size 256
+srun -ul --environment=./edf.toml python main.py --method {method} --epochs 10 --batch_size 256
 """
 
 for cfg in configs:
