@@ -41,7 +41,20 @@ plt.grid(True)
 plt.legend()
 plt.savefig("plot_val_loss.png")
 
-# Plot 3: Peak Memory per GPU vs GPUs
+# Plot 3: Accuracy vs GPUs
+plt.figure()
+for method in df["method"].unique():
+    subset = df[df["method"] == method]
+    plt.plot(subset["gpus"], subset["acc"], marker="o", label=method.upper())
+
+plt.title("Accuracy vs GPUs")
+plt.xlabel("GPUs")
+plt.ylabel("Accuracy [%]")
+plt.grid(True)
+plt.legend()
+plt.savefig("plot_accuracy.png")
+
+# Plot 4: Peak Memory per GPU vs GPUs
 plt.figure()
 for method in df["method"].unique():
     subset = df[df["method"] == method]

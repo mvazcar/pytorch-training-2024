@@ -25,7 +25,10 @@ def run(args):
 
     # The optimizer and the loss function are identical to the serial training
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    loss_function = nn.NLLLoss()
+    # In contrast to the serial version, we the negative log likelihood with simple summation instead
+    # of averaging. The reason is that we will reduce the loss from all participating workers later
+    # in the training and the simple summation makes the loss scale invariant.
+    loss_function = nn.NLLLoss(reduction='sum')
 
     ### TODO: Launch training
     # train(_____)

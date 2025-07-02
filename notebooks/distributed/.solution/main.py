@@ -23,7 +23,10 @@ def run(args):
         raise ValueError(f"Unknown method: {args.method}")
 
     optimizer = optim.Adam(model.parameters(), lr=0.001)
-    loss_function = nn.NLLLoss()
+    # In contrast to the serial version, we the negative log likelihood with simple summation instead
+    # of averaging. The reason is that we will reduce the loss from all participating workers later
+    # in the training and the simple summation makes the loss scale invariant.
+    loss_function = nn.NLLLoss(reduction='sum')
 
     train(model, optimizer, loss_function, args.epochs, device, trainloader, validloader, args.print_every)
 
