@@ -1,6 +1,6 @@
 image = "/capstor/store/cscs/cscs/jupyter/pytorch/pytorch-course-tf-25.05-py3.sqsh"
 mounts = ["/capstor:/capstor", "/iopsstor:/iopsstor"]
-workdir = "/capstor/scratch/cscs/${USER}/pytorch-training/notebooks/distributed"
+workdir = "/capstor/scratch/cscs/${USER}/pytorch-training/notebooks/distributed/.solution"
 entrypoint = false
 writable = true
 
