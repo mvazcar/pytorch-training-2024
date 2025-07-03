@@ -109,7 +109,6 @@ level: 2
 
 ### Pros:
 
-<v-clicks>
 
 - Easy to implement
 - Scales well with the number of GPUs
@@ -117,7 +116,6 @@ level: 2
 - Good computation/communication ratio
 - Speedup is close to linear with the number of GPUs
 
-</v-clicks>
 
 </div>
 <div class="col-span-1">
@@ -125,11 +123,9 @@ level: 2
 
 ### Cons:
 
-<v-clicks>
 
 - Large models do not fit in a single GPU memory
 
-</v-clicks>
 
 </div>
 </div>
@@ -211,40 +207,6 @@ level: 2
 </div>
 </div>
 
-
----
-level: 2
----
-
-ZeRO is a memory optimization technique for training large models by partitioning optimizer states, gradients, and parameters across devices. It is designed to reduce memory consumption while only increasing the communication volume by 1.5x wrt data parallelism (DP). 
-
-For large models,
-the majority of the memory is occupied by model states which include the optimizer states
-(such as momentum and variances in Adam [6]), gradients, and parameters. 2) The remaining
-memory is consumed by activation, temporary buﬀers and unusable fragmented memor
-
-optimizing memory:
-
-DP has good compute/communication eﬃciency but poor memory eﬃciency while
-MP can have poor compute/communication eﬃciency
-
-other approaches maintain all the model states required over the entire training process
-statically, even though not all model states are required all the time during the trainin
-
-1) Optimizer State Partitioning (Pos): 4x memory reduction, same communication volume
-as DP;
-2) Add Gradient Partitioning (Pos+g ): 8x memory reduction, same communication volume
-as DP;
-3) Add Parameter Partitioning (Pos+g+p): Memory reduction is linear with DP degree Nd.
-For example, splitting across 64 GPUs (Nd = 64) will yield a 64x memory reduction. There is
-a modest 50% increase in communication volume.
-
-
-MP approaches today often need some work from model developers to revise their model,
-system developers to work out distributed operators, and existing work like Megatron-LM only
-supports a limited set of operators and models
-
-does it 
 
 ---
 level: 2
@@ -503,7 +465,6 @@ level: 2
 - can be used in combination with MPI
 - collectives may be faster than GPU-aware MPI
 - often used in AI applications (PyTorch, Keras or TensorFlow)
-- can be used for HPC applications, too!
 - AMD's version: RCCL
 
 </div>
@@ -625,12 +586,151 @@ level: 2
 level: 2
 ---
 
+<div grid="~ cols-2 gap-4">
+<div class="col-span-1">
+
+# `torch.distributed`
+
+- Core PyTorch package for distributed training
+- Initializes communication between processes
+- Common backends:
+  - `nccl` (recommended for GPU)
+  - `gloo` (CPU and fallback)
+
+
+</div>
+<div class="col-span-1">
+
+```python
+import torch.distributed as dist
+
+dist.init_process_group(
+  backend="nccl",
+  device_id=torch.device(f"cuda:{GPU_ID}"))
+torch.cuda.set_device(GPU_ID)
+```
+
+- By default, PyTorch uses environment variables
+  - `RANK`: global rank of the process
+  - `LOCAL_RANK`: rank on the current node
+  - `WORLD_SIZE`: total number of processes
+  - `MASTER_ADDR`: address of the master node
+  - `MASTER_PORT`: port for communication
+
+</div>
+</div>
+
+---
+level: 2
+---
+
+# `DistributedSampler`
+
+- Ensures each process gets a unique slice of the dataset
+- Avoids overlapping data between workers
+- Should be used with `DataLoader` in distributed training
+
+```python
+from torch.utils.data import DataLoader, DistributedSampler
+
+# Same arguments as serial DataLoader
+sampler = DistributedSampler(train_dataset, shuffle=True)
+# Watch out for the batch size!
+loader = DataLoader(trainset, batch_size=local_batch_size, sampler=sampler)
+```
+
+---
+level: 2
+---
+
+# `torch.nn.parallel.DistributedDataParallel` (DDP)
+
+- Wraps the model for multi-GPU training
+- Each process gets its own model replica
+
+```python
+import torch.nn as nn
+model = nn.parallel.DistributedDataParallel(model, device_ids=[GPU_ID])
+```
+
+---
+level: 2
+---
+
+# `torch.distributed.fsdp.FullyShardedDataParallel` (FSDP)
+
+<div grid="~ cols-2 gap-4">
+<div class="col-span-1">
+
+- Advanced parallelism: shards parameters, gradients, and optimizer states
+- Reduces memory usage significantly
+- Useful for large models
+- Wraps your model to enable FSDP using `auto_wrap_policy`
+```python
+def custom_auto_wrap_policy(
+    module, recurse, nonwrapped_numel):
+    ...
+```
+
+</div>
+<div class="col-span-1">
+
+```python
+from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+from torch.distributed.fsdp import MixedPrecision, CPUOffload, ShardingStrategy
+
+mixed_precision = MixedPrecision(
+    param_dtype=torch.float16,
+    reduce_dtype=torch.float16,
+    buffer_dtype=torch.float16,
+)
+
+model = FSDP(
+    model,
+    device_id=device_id,
+    auto_wrap_policy=custom_auto_wrap_policy,
+    mixed_precision=mixed_precision,
+    sharding_strategy=ShardingStrategy.FULL_SHARD,
+    cpu_offload=CPUOffload(offload_params=False)
+)
+```
+
+</div>
+</div>
+
+---
+level: 2
+---
+
+# Training Loop Structure
+
+
+- Loop over epochs
+    - Shuffle data using `DistributedSampler.set_epoch(epoch)`
+    - Loop over batches (same as serial version!)
+        - Forward pass
+        - Compute loss
+        - Backward pass
+        - Optimizer step
+
+    - Validation
+        - validation loss: synchronization using `dist.all_reduce`
+
+
+
+
+---
+level: 2
+---
+
 # Lab: Distributed Training of CNN
 
 
 - From a working **single-GPU CNN model** to a **scalable multi-GPU** training
     - **Distributed Data Parallel (DDP)**
     - **Fully Sharded Data Parallel (FSDP)**
+- In the end: Strong scaling study (fixed **global batch size**)
+    - How does the training time change with the number of GPUs
 - Slurm job submission (no JupyterLab)
 
 ---

@@ -114,6 +114,8 @@ Have a look at `fsdp_utils.py`:
 - What does `MixedPrecision(...)` help with?
 - What does `ShardingStrategy.FULL_SHARD` mean? How does it differ from DDP?
 
+Try to look up the documentation for to answer these questions.
+
 ### Exerecise 4.3: DDP vs. FSDP
 
 - When would you choose FSDP over DDP?

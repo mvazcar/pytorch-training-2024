@@ -7,8 +7,7 @@ def setup():
     """
     Initializes torch.distributed using environment variables (SLURM compatible).
     Assumes:
-        - MASTER_ADDR and MASTER_PORT are set in environment.
-        - RANK, LOCAL_RANK and WORLD_SIZE are set by SLURM (or manually).
+        - MASTER_ADDR and MASTER_PORT, RANK, LOCAL_RANK and WORLD_SIZE are set in the environment.
     """
     local_rank = int(os.environ.get("LOCAL_RANK", 0))
 
