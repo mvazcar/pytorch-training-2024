@@ -2,7 +2,6 @@ import torch
 import torch.distributed as dist
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 from torch.distributed.fsdp import MixedPrecision, CPUOffload, ShardingStrategy
-#from torch.distributed.fsdp.wrap import lambda_auto_wrap_policy
 from model import CNN
 import torch.nn as nn
 
