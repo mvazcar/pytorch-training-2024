@@ -25,7 +25,7 @@ export OMP_NUM_THREADS=64
 srun -ul --environment=./edf.toml bash -c "
     export RANK=\$SLURM_PROCID
     export LOCAL_RANK=\$SLURM_LOCALID
-    LOCAL_RANK=$SLURM_LOCALID python main.py --method ddp --epochs 15
+    python main.py --method ddp --epochs 15
 "
 
 
