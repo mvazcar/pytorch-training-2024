@@ -1,5 +1,8 @@
 # [Hands-on Introduction to Deep Learning with PyTorch]
 
+## Video Lectures
+
+[Youtube Playlist](https://www.youtube.com/watch?v=tGjvTrBR7Fo&list=PL1tk5lGm7zvQVR8NJrPeH9_RC_i_PYEqD&index=2)
 ## Course Description
 
 This course is intended as a quick introduction of fundamental concepts of deep learning, covering neural network basics, training methods, as well as a few examples of specific applications such as convolutional neural networks for computer vision and the transformer model for natural language processing.
