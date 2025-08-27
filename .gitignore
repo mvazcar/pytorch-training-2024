@@ -6,6 +6,3 @@ data/
 
 #macos
 .DS_Store
-
-slides/src/.cache/
-slides/src/.pnpm-store/
